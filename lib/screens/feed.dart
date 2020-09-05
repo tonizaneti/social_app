@@ -1,6 +1,9 @@
 import "package:flutter/material.dart";
+import 'package:social_app/components/custom_drawer.dart';
 import 'package:social_app/models/post.dart';
 import 'package:social_app/service/placeholder_service.dart';
+
+import 'comments.dart';
 
 class Feed extends StatefulWidget {
   @override
@@ -10,16 +13,16 @@ class Feed extends StatefulWidget {
 
 class _FeedState extends State<Feed> {
  final PlaceholderService _placeholderService = PlaceholderService();
- List<Post> _posts = [];
+ //List<Post> _posts = [];
  @override
   void initState()
   {
     super.initState();
-    _placeholderService.getPosts().then((resp){
+   /* _placeholderService.getPosts().then((resp){
       setState(() {
         _posts = resp;
       });
-  });
+  });*/
   }
 
   @override
@@ -30,18 +33,47 @@ class _FeedState extends State<Feed> {
         title: Text("Feed - Studio Zaneti"),
         centerTitle: true,
       ),
-      body: FutureBuilder<List<Post>>(
-        future: _placeholderService.getPosts() ,
-        builder: (context, snapshot){
-          if(snapshot.hasData){
-            return Text('Ok');
+      drawer: CustomDrawer(),
+      body: Container(
+        color: Colors.blueGrey,
+        child: FutureBuilder<List<Post>>(
+          future: _placeholderService.getPosts() ,
+          builder: (context, snapshot){
+            if(snapshot.hasData){
+              return ListView.builder(
+                padding: const EdgeInsets.all(8),
+                  itemCount: snapshot.data.length,
+                  itemBuilder:(context, index) {
+                    return GestureDetector(
+                      onTap: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context)=>
+                              Comments(snapshot.data[index].id ), )
+                        );
+                      },
+                      child:Card(
+                          child: Column(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  '${snapshot.data[index].title}
+                                ),
+                              subtitle:Text('${snapshot.data[index].body}')),
+
+                            ],
+                          )
+                      ) ,
+                    );
+                  } ,
+              );
+    } else if(snapshot.hasError){
+              return Text('Erro');
     }
-          else if(snapshot.hasError){
-            return Text('Erro');
-    }
-          return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
     },
     ),
+      ),
     );
   }
 }

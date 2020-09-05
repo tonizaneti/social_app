@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:social_app/models/post.dart';
+import 'package:social_app/models/user.dart';
+import 'package:social_app/models/comment.dart';
 
 class PlaceholderService {
   final baseUrl = 'https://jsonplaceholder.typicode.com';
@@ -13,6 +15,28 @@ class PlaceholderService {
       return posts;
     } else {
       throw Exception('Erro ao Buscar posts');
+    }
+  }
+
+  Future<User> getPerfil() async {
+    var response = await http.get('$baseUrl/users/1');
+    if (response.statusCode == 200) {
+      var user = User.fromJson((jsonDecode(response.body)));
+      return user;
+    }
+    else {
+      throw Exception('Erro Ao Buscar Perfil do Usuário.');
+    }
+  }
+
+  Future<List<Comment>> getComments(int postId) async {
+    var response = await http.get('$baseUrl/posts/$postId/comments');
+    if (response.statusCode == 200) {
+      var objs = jsonDecode(response.body) as List;
+      var comments = objs.map((obj) => Comment.fromJson(obj)).toList();
+      return comments;
+    } else {
+      throw Exception('Erro ao Buscar Comentários');
     }
   }
 }
